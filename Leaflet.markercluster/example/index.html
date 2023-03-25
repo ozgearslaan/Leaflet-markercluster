@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet Map</title>
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" integrity="sha512-07I2e+7D8p6he1SIM+1twR5TIrhUQn9+I6yjqD53JQjFiMf8EtC93ty0/5vJTZGF8aAocvHYNEDJajGdNx1IsQ==" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js" integrity="sha512-WXoSHqw/t26DszhdMhOXOkI7qCiv5QWXhH9R7CgvgZMHz1ImlkVQ3uNsiQKu5wwbbxtPzFXd1hK4tzno2VqhpA==" crossorigin=""></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="screen.css" />
+
+	<link rel="stylesheet" href="../dist/MarkerCluster.css" />
+	<link rel="stylesheet" href="../dist/MarkerCluster.Default.css" />
+	<script src="../dist/leaflet.markercluster-src.js"></script>
+	<script src="leaflet.markercluster.layersupport.js"></script>
+	<script src="den.js"></script>
+	<meta charset="UTF-8">
+
+</head>
+<body>
+	<h2>Okullar ve Kurumlar</h2>
+
+	<div id="map"></div>
+	
+	<script type="text/javascript">
+
+		var tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 25,
+			minZoom: 1,
+			attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Points &copy 2012 LINZ'
+			}),
+			latlng = L.latLng(40.979645135,29.050701817);
+
+		var map = L.map('map', {center: latlng, zoom: 5, layers: [tiles]});
+
+		//var markers = L.markerClusterGroup();
+		var markersArray = [],
+   		markers = new L.MarkerClusterGroup({
+   		iconCreateFunction: function (cluster) {
+        	var markers = cluster.getAllChildMarkers();
+            
+            for (var i = 0; i < markers.length; i++) {
+            	if (markers[i].changed) {
+                	return L.divIcon({
+                        html: cluster.getChildCount(),
+                        className: 'myclusterChanged',
+                        iconSize: L.point(40,40)
+                    });
+                }
+            }
+            return L.divIcon({
+                        html: cluster.getChildCount(),
+                        className: 'mycluster',
+                        iconSize: L.point(40,40)
+                    });
+        }
+   });
+
+ //  var bigIcon = {
+   // radius: 10,
+    //fillColor: "black",
+   // weight: 1,
+    //opacity: 1,
+   // fillOpacity: 0.8
+//};
+//var smallIcon = {
+  //  radius: 5,
+    //fillColor: "red",
+    //weight: 1,
+    //opacity: 1,
+    //fillOpacity: 0.8
+//};
+//attributes for basemap credit (lower right hand corner annotation)
+var streetsAttr = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+var aerialAttr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
+var artsyfartsyAttr = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+//crete variables for the base map layer switcher
+var streets = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}.png', {id: 'MapID', attribution: streetsAttr}),
+    aerial   = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {id: 'MapID', attribution: aerialAttr}),
+    artsyfartsy = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {id: 'MapID', attribution: artsyfartsyAttr});
+
+//create baseMaps variable to store basemap layer switcher
+var baseMaps = {
+    "Streets": streets,
+    "Aerial": aerial,
+    "ArtsyFartsy": artsyfartsy
+};
+
+var greenIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [30, 46],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+		for (var i = 0; i < den.length; i++) {
+			var a = den[i];
+			var adi = a[3];
+			var ilce = a[4];
+			var turu = a[5];
+			var adres = a[6];
+			var telefon = a[2];
+			//var mail = a[7];
+			var marker = L.marker(L.latLng(a[1], a[0]), {icon: greenIcon});
+			marker.bindPopup(ilce + '</br>' + adi + '</br>' + turu + '</br>' + adres + '</br>' + telefon  );
+
+			markers.addLayer(marker);
+		}
+
+		map.addLayer(markers);
+
+		L.control.scale().addTo(map);
+		L.control.layers(baseMaps).addTo(map);
+	
+	</script>
+</body>
+</html>
